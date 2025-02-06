@@ -206,7 +206,7 @@ function App() {
             }}
             className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
           >
-            <div className="flex items-center gap-4 text-white/90">
+            <div className="flex items-center gap-2 text-white/90">  {/* Changed gap-4 to gap-2 */}
               <motion.div
                 animate={{ 
                   x: [20, -20],

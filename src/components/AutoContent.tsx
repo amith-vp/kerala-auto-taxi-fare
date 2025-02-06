@@ -223,17 +223,31 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
         </motion.div>
       </div>
       <div className="mt-auto pt-4 pb-2 text-center space-y-1">
-      <motion.a
-          href="https://amithv.xyz"
-          target="_blank"
-          rel="noopener noreferrer"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="text-white/30 hover:text-white/50 text-xs transition-colors"
-        >
-          by Amith
-        </motion.a>
+        <div className="flex items-center justify-center gap-2">
+          <motion.a
+            href="https://amithv.xyz"
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-white/30 hover:text-white/50 text-xs transition-colors"
+          >
+            by Amith
+          </motion.a>
+          <span className="text-white/30">•</span>
+          <motion.a
+            href="https://github.com/amith-vp/kerala-auto-taxi-fare"
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-white/30 hover:text-white/50 text-xs transition-colors"
+          >
+            GitHub
+          </motion.a>
+        </div>
         <motion.a
           href="https://mvd.kerala.gov.in/sites/default/files/Downloads/G.O.P.No_.14-2022-TRANS.pdf"
           target="_blank"
@@ -245,7 +259,6 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
         >
           Based on Kerala MVD fare notification (G.O.P No. 14/2022/TRANS)
         </motion.a>
-       
       </div>
     </motion.div>
   );

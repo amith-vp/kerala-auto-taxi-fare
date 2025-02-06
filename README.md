@@ -1,6 +1,6 @@
 # Kerala Auto Taxi Fare Calculator
 
-A modern, interactive web application to calculate fares for Auto Rickshaw, Taxi, and Bus services in Kerala,based on governemt circular.
+A modern, interactive web application to calculate fares for Auto Rickshaw, Taxi, and Bus services in Kerala,based on government circular.
 
 
 ## LIVE [https://autofare.keralam.co](https://autofare.keralam.co)
