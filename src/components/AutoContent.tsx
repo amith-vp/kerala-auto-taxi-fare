@@ -32,7 +32,7 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
     waitingTime: '0',
     isNightTime: false,
     isReturnJourney: false,
-    isMajorCity: true
+    isMajorCity: false
   });
 
   const [fareBreakdown, setFareBreakdown] = useState<FareBreakdown>({
