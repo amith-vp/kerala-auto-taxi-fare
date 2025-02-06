@@ -242,7 +242,7 @@ function App() {
                 }}
                 className="w-4 h-4 bg-white rounded-full"
               />
-              <span className="text-lg font-medium bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+              <span className="text-lg font-medium bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg select-none">
                 Swipe
               </span>
             </div>
@@ -257,10 +257,10 @@ function App() {
                 initial={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
               >
-                <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80  tracking-wide mb-4 drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
+                <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80  tracking-wide mb-4 drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)] select-none">
                   Kerala Auto Taxi Fare Calculator 
                 </h1>
-                <p className="text-xl text-white/90  max-w-2xl mx-auto leading-relaxed mb-4 drop-shadow-sm backdrop-blur-[2px]">
+                <p className="text-xl text-white/90  max-w-2xl mx-auto leading-relaxed mb-4 drop-shadow-sm backdrop-blur-[2px] select-none">
                   Calculate the fare for your Auto Rikshaw, Bus, or Taxi ride in Kerala.
                 </p>
               </motion.div>
@@ -358,7 +358,7 @@ function App() {
                         {isExpanded ? (
                           <div className="flex justify-between items-center w-full">
                             <div className="flex items-center gap-2">
-                              <h2 className="text-xl font-bold text-white drop-shadow-lg">
+                              <h2 className="text-xl font-bold text-white drop-shadow-lg select-none">
                                 {card.title}
                               </h2>
                               <img 
@@ -375,7 +375,7 @@ function App() {
                             </button>
                           </div>
                         ) : (
-                          <h2 className="text-xl font-bold text-white drop-shadow-lg w-full text-center">
+                          <h2 className="text-xl font-bold text-white drop-shadow-lg w-full text-center select-none">
                             {card.title}
                           </h2>
                         )}
