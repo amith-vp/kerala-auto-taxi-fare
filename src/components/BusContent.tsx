@@ -105,7 +105,7 @@ const BusContent: React.FC<ContentProps> = ({ isExpanded }) => {
             <select
               value={selectedService}
               onChange={(e) => setSelectedService(e.target.value)}
-              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white [&>option]:text-gray-900"
             >
               {busServices.map(service => (
                 <option key={service.id} value={service.id}>
