@@ -183,6 +183,30 @@ function App() {
     };
   }, [isExpanded, cardsLength]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isExpanded) {
+        switch (e.key) {
+          case 'ArrowLeft':
+            setPrevFront(front);
+            setFront((front - 1 + cardsLength) % cardsLength);
+            setSwipeKeyframes(-150);
+            setAnimateSvg(true);
+            break;
+          case 'ArrowRight':
+            setPrevFront(front);
+            setFront((front + 1) % cardsLength);
+            setSwipeKeyframes(150);
+            setAnimateSvg(true);
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [front, isExpanded, cardsLength]);
+
   return (
     <AnimatePresence>
       <motion.div 
