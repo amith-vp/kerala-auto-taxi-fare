@@ -116,7 +116,7 @@ const TaxiContent: React.FC<ContentProps> = ({ isExpanded }) => {
                 title="Calculate distance using map"
               >
                 <MapIcon className="w-5 h-5" />
-                <span>Map</span>
+                <span>Use Map</span>
               </button>
             </div>
           </motion.div>
