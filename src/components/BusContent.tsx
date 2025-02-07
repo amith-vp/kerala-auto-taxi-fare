@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FareBreakdown } from './FareBreakdown';
+import { MapIcon } from 'lucide-react';
+import MapDistance from './MapDistance';
 
 interface ContentProps {
   isExpanded: boolean;
@@ -39,6 +41,7 @@ const BusContent: React.FC<ContentProps> = ({ isExpanded }) => {
     additionalFare: number;
     totalFare: number;
   }>({ minFare: 10, additionalFare: 0, totalFare: 10 });
+  const [showMap, setShowMap] = useState(false);
 
   const calculateFare = () => {
     const service = busServices.find(s => s.id === selectedService)!;
@@ -100,6 +103,31 @@ const BusContent: React.FC<ContentProps> = ({ isExpanded }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
+          <motion.div 
+            className="space-y-2"
+            whileHover={{ scale: 1.005 }}
+          >
+            <label className="block text-white/90">Distance (KM)</label>
+            <div className="flex gap-2 items-center">
+              <input
+                type="number"
+                value={distance}
+                onChange={(e) => setDistance(e.target.value)}
+                step="0.1"
+                min="0"
+                className="w-[180px] px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+              />
+              <span className="text-white/50 text-sm px-1">OR</span>
+              <button
+                onClick={() => setShowMap(true)}
+                className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors flex items-center gap-2 justify-center"
+                title="Calculate distance using map"
+              >
+                <MapIcon className="w-5 h-5" />
+                <span>Map</span>
+              </button>
+            </div>
+          </motion.div>
           <div className="space-y-2">
             <label className="block text-white/90">Bus Service Type</label>
             <select
@@ -114,20 +142,6 @@ const BusContent: React.FC<ContentProps> = ({ isExpanded }) => {
               ))}
             </select>
           </div>
-          <motion.div 
-            className="space-y-2"
-            whileHover={{ scale: 1.005 }}
-          >
-            <label className="block text-white/90">Distance (KM)</label>
-            <input
-              type="number"
-              value={distance}
-              onChange={(e) => setDistance(e.target.value)}
-              step="0.1"
-              min="0"
-              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-            />
-          </motion.div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0 }}
@@ -161,6 +175,14 @@ const BusContent: React.FC<ContentProps> = ({ isExpanded }) => {
           />
         </motion.div>
       </div>
+      {showMap && (
+        <MapDistance
+          onDistanceCalculated={(distance) => {
+            setDistance(distance.toFixed(2));
+          }}
+          onClose={() => setShowMap(false)}
+        />
+      )}
       <div className="mt-auto pt-4 pb-2 text-center space-y-1">
         <div className="flex items-center justify-center gap-2">
           <motion.a

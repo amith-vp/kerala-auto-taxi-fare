@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, MapIcon } from 'lucide-react';
 import { FareBreakdown } from './FareBreakdown';
 import Toggle from './Toggle';
+import MapDistance from './MapDistance';
 
 interface ContentProps {
   isExpanded: boolean;
@@ -45,6 +46,7 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
   });
 
   const [calculatedDistance, setCalculatedDistance] = useState<number>(1.5);
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     if (formData.distance) {
@@ -88,6 +90,19 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
+    if (name === 'distance') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+      
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue)) {
+        calculateFare();
+      }
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -125,15 +140,26 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
             transition={{ type: "spring", stiffness: 200 }}
           >
             <label className="block text-white/90">Distance (KM)</label>
-            <input
-              type="number"
-              name="distance"
-              value={formData.distance}
-              onChange={handleInputChange}
-              step="0.1"
-              min="0"
-              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-            />
+            <div className="flex gap-2 items-center">
+              <input
+                type="number"
+                name="distance"
+                value={formData.distance}
+                onChange={handleInputChange}
+                step="0.1"
+                min="0"
+                className="w-[180px] px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+              />
+              <span className="text-white/50 text-sm px-1">OR</span>
+              <button
+                onClick={() => setShowMap(true)}
+                className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors flex items-center gap-2 justify-center"
+                title="Calculate distance using map"
+              >
+                <MapIcon className="w-5 h-5" />
+                <span>Map</span>
+              </button>
+            </div>
           </motion.div>
           <motion.div 
             className="space-y-2"
@@ -151,7 +177,7 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
             />
           </motion.div>
           <motion.div 
-            className="space-y-4"
+            className="space-y-4 py-5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
@@ -161,21 +187,21 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
               name="isMajorCity"
               checked={formData.isMajorCity}
               onChange={handleInputChange}
-              label="Major City (Thiruvananthapuram, Kollam, Kochi, Thrissur, Kozhikode, Kannur, Palakkad, or Kottayam)"
+              label="Major City - Thiruvananthapuram, Kollam, Kochi, Thrissur, Kozhikode, Kannur, Palakkad, Kottayam"
             />
             <Toggle
               id="isNightTime"
               name="isNightTime"
               checked={formData.isNightTime}
               onChange={handleInputChange}
-              label="Night Time (10 PM - 5 AM)"
+              label="Night Time Journey (10 PM - 5 AM)"
             />
             <Toggle
               id="isReturnJourney"
               name="isReturnJourney"
               checked={formData.isReturnJourney}
               onChange={handleInputChange}
-              label="Includes Return Journey"
+              label="Return Journey Included"
             />
           </motion.div>
         </motion.div>
@@ -222,6 +248,14 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
           />
         </motion.div>
       </div>
+      {showMap && (
+        <MapDistance
+          onDistanceCalculated={(distance) => {
+            setFormData(prev => ({ ...prev, distance: distance.toFixed(2) }));
+          }}
+          onClose={() => setShowMap(false)}
+        />
+      )}
       <div className="mt-auto pt-4 pb-2 text-center space-y-1">
         <div className="flex items-center justify-center gap-2">
           <motion.a

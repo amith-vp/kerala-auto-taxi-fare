@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FareBreakdown } from './FareBreakdown';
 import Toggle from './Toggle';
+import { MapIcon } from 'lucide-react';
+import MapDistance from './MapDistance';
 
 interface ContentProps {
   isExpanded: boolean;
@@ -29,6 +31,7 @@ const TaxiContent: React.FC<ContentProps> = ({ isExpanded }) => {
   });
 
   const [calculatedDistance, setCalculatedDistance] = useState<number>(5);
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     if (formData.distance) {
@@ -96,15 +99,26 @@ const TaxiContent: React.FC<ContentProps> = ({ isExpanded }) => {
             transition={{ type: "spring", stiffness: 200 }}
           >
             <label className="block text-white/90">Distance (KM)</label>
-            <input
-              type="number"
-              name="distance"
-              value={formData.distance}
-              onChange={handleInputChange}
-              step="0.1"
-              min="0"
-              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-            />
+            <div className="flex gap-2 items-center">
+              <input
+                type="number"
+                name="distance"
+                value={formData.distance}
+                onChange={handleInputChange}
+                step="0.1"
+                min="0"
+                className="w-[180px] px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+              />
+              <span className="text-white/50 text-sm px-1">OR</span>
+              <button
+                onClick={() => setShowMap(true)}
+                className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors flex items-center gap-2 justify-center"
+                title="Calculate distance using map"
+              >
+                <MapIcon className="w-5 h-5" />
+                <span>Map</span>
+              </button>
+            </div>
           </motion.div>
           <motion.div 
             className="space-y-2"
@@ -171,6 +185,14 @@ const TaxiContent: React.FC<ContentProps> = ({ isExpanded }) => {
           />
         </motion.div>
       </div>
+      {showMap && (
+        <MapDistance
+          onDistanceCalculated={(distance) => {
+            setFormData(prev => ({ ...prev, distance: distance.toFixed(2) }));
+          }}
+          onClose={() => setShowMap(false)}
+        />
+      )}
       <div className="mt-auto pt-4 pb-2 text-center space-y-1">
         <div className="flex items-center justify-center gap-2">
           <motion.a
