@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   MapContainer,
   TileLayer,
   LayersControl,
   Marker,
   useMapEvents,
-  AttributionControl
+  AttributionControl,
+  GeoJSON
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -38,6 +39,14 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
   const [endPoint, setEndPoint] = useState<[number, number] | null>(null);
   const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
   const [routeKey, setRouteKey] = useState(0);
+  const [districtData, setDistrictData] = useState<any>(null); 
+
+  useEffect(() => {
+    fetch(`district.geojson`)
+      .then(res => res.json())
+      .then(data => setDistrictData(data))
+      .catch(err => console.error(err));
+  }, []);
 
   const handleMapClick = (lat: number, lng: number) => {
     if (!startPoint) {
@@ -70,6 +79,14 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
     setRouteKey(prev => prev + 1); 
   };
 
+  const geoJSONStyle = {
+    fillColor: 'transparent',
+    weight: 2,
+    opacity: 0.1,
+    color: 'white',
+    fillOpacity: 0.1
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-black/90 backdrop-blur-md p-4 rounded-lg w-[90vw] max-w-5xl">
@@ -86,8 +103,8 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
 
         <div className="relative h-[60vh] rounded-lg overflow-hidden">
           <MapContainer
-            center={[10.8505, 76.2711]}
-            zoom={8}
+            center={[10.0159, 76.3419]}
+            zoom={12}
             style={{ height: "100%", width: "100%" }}
             maxBounds={KERALA_BOUNDS}
             minZoom={7}
@@ -107,6 +124,13 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://jawg.io">JawgIO</a>'
                   url={`https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}.png?access-token=${import.meta.env.VITE_JAWG_ACCESS_TOKEN}`}
                 />
+
+            {districtData && ( 
+              <GeoJSON
+                data={districtData}
+                style={geoJSONStyle}
+              />
+            )}
 
             {startPoint && (
               <Marker 
@@ -132,7 +156,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
 
             {startPoint && endPoint && (
               <RoutingControl
-                key={routeKey} // Add this line
+                key={routeKey}
                 position="topleft"
                 start={startPoint}
                 end={endPoint}
