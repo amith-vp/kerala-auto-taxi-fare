@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   MapContainer,
   TileLayer,
-  LayersControl,
   Marker,
   useMapEvents,
   AttributionControl,
@@ -40,6 +39,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
   const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
   const [routeKey, setRouteKey] = useState(0);
   const [districtData, setDistrictData] = useState<any>(null); 
+  const [isCalculating, setIsCalculating] = useState(false);
 
   useEffect(() => {
     fetch(`district.geojson`)
@@ -56,7 +56,8 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
     }
   };
 
-  const handleWaypointChange = (points: [number, number][], totalDistance?: number) => {
+  const handleWaypointChange = React.useCallback((points: [number, number][], totalDistance?: number) => {
+    setIsCalculating(false);
     if (points.length >= 2) {
       setStartPoint(points[0]);
       setEndPoint(points[points.length - 1]);
@@ -64,9 +65,10 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
         setCalculatedDistance(Number(totalDistance.toFixed(2)));
       }
     }
-  };
+  }, []);
 
-  const handleMarkerDrag = (isStart: boolean) => (e: any) => {
+  const handleMarkerDrag = React.useCallback((isStart: boolean) => (e: any) => {
+    setIsCalculating(true);
     const marker = e.target;
     const position = marker.getLatLng();
     const newPoint: [number, number] = [position.lat, position.lng];
@@ -76,7 +78,27 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
     } else {
       setEndPoint(newPoint);
     }
-    setRouteKey(prev => prev + 1); 
+    setRouteKey(prev => prev + 1);
+  }, []);
+
+  const clearRoute = () => {
+    setStartPoint(null);
+    setEndPoint(null);
+    setCalculatedDistance(null);
+    setRouteKey(prev => prev + 1);
+  };
+
+  const getHeaderInstructions = () => {
+    if (!startPoint) return '👆 Tap on the map to select starting point';
+    if (!endPoint) return '👆 Tap anywhere to set destination';
+    return null;
+  };
+
+  const getMapInstructions = () => {
+    if (startPoint && endPoint) {
+      return '✋ Drag markers to move • Tap yellow line to add stops';
+    }
+    return null;
   };
 
   const geoJSONStyle = {
@@ -92,19 +114,29 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
       <div className="bg-black/90 backdrop-blur-md p-4 rounded-lg w-[90vw] max-w-5xl">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-white font-semibold">Select Route Points</h3>
-          <button onClick={onClose} className="text-white/70 hover:text-white">✕</button>
+          <div className="flex gap-2">
+            {(startPoint || endPoint) && (
+              <button 
+                onClick={clearRoute}
+                className="px-3 py-1 bg-red-600/70 text-white text-sm rounded hover:bg-red-600"
+              >
+                Clear Route
+              </button>
+            )}
+            <button onClick={onClose} className="text-white/70 hover:text-white px-2">✕</button>
+          </div>
         </div>
 
-        <div className="text-white/90 text-md text-center mb-4">
-          {!startPoint ? 'Tap on the map to select starting point' : 
-           !endPoint ? 'Select destination point' : 
-           'Route calculated'}
-        </div>
+        {getHeaderInstructions() && (
+          <div className="text-white/90 text-sm md:text-md text-center mb-4">
+            <p>{getHeaderInstructions()}</p>
+          </div>
+        )}
 
-        <div className="relative h-[60vh] rounded-lg overflow-hidden">
+        <div className="relative h-[60vh] rounded-lg overflow-hidden touch-manipulation">
           <MapContainer
-            center={[10.0159, 76.3419]}
-            zoom={12}
+            defaultCenter={[10.0159, 76.3419]}
+            defaultZoom={12}
             style={{ height: "100%", width: "100%" }}
             maxBounds={KERALA_BOUNDS}
             minZoom={7}
@@ -112,6 +144,11 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
             boundsOptions={{ padding: [50, 50] }}
             bounds={KERALA_BOUNDS}
             attributionControl={false}
+            dragging={true}
+            tap={true}
+            touchZoom={true}
+            doubleClickZoom={false}
+            className="touch-manipulation"
           >
             <AttributionControl
               position="bottomright"
@@ -128,7 +165,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
             {districtData && ( 
               <GeoJSON
                 data={districtData}
-                style={geoJSONStyle}
+                pathOptions={geoJSONStyle}
               />
             )}
 
@@ -138,7 +175,8 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
                 draggable={true}
                 icon={startIcon}
                 eventHandlers={{
-                  dragend: handleMarkerDrag(true)
+                  dragend: handleMarkerDrag(true),
+                  touchstart: (e) => e.target.dragging.enable()
                 }}
               />
             )}
@@ -164,23 +202,36 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
                 onWaypointChange={handleWaypointChange}
               />
             )}
+            {getMapInstructions() && (
+              <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-black/70 text-white text-xs p-2 rounded-lg text-center">
+                {getMapInstructions()}
+              </div>
+            )}
           </MapContainer>
         </div>
         
         {startPoint && endPoint && (
-          <div className="mt-4 text-center">
+          <div className="mt-4 flex justify-center gap-4">
+            <button
+              onClick={clearRoute}
+              className="px-4 py-2 bg-red-600/70 text-white rounded hover:bg-red-600"
+              disabled={isCalculating}
+            >
+              Reset Route
+            </button>
             <button
               onClick={() => {
-                const distance = L.latLng(startPoint[0], startPoint[1])
-                  .distanceTo(L.latLng(endPoint[0], endPoint[1])) / 1000;
-                const formattedDistance = Number(distance.toFixed(2));
-                setCalculatedDistance(formattedDistance);
-                onDistanceCalculated(formattedDistance);
-                onClose();
+                if (calculatedDistance && !isCalculating) {
+                  onDistanceCalculated(calculatedDistance);
+                  onClose();
+                }
               }}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className={`px-4 py-2 ${
+                isCalculating ? 'bg-blue-600/50' : 'bg-blue-600'
+              } text-white rounded hover:bg-blue-700`}
+              disabled={isCalculating}
             >
-              Proceed
+              {isCalculating ? 'Calculating...' : 'Confirm Route'}
             </button>
           </div>
         )}
@@ -189,4 +240,4 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
   );
 };
 
-export default MapDistance;
+export default React.memo(MapDistance);
