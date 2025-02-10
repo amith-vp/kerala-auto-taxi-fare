@@ -148,7 +148,7 @@ const AutoContent: React.FC<ContentProps> = ({ isExpanded }) => {
                 onChange={handleInputChange}
                 step="0.1"
                 min="0"
-                className="w-[180px] px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                className="w-[150px] px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
               />
               <span className="text-white/50 text-sm px-1">OR</span>
               <button
