@@ -44,21 +44,21 @@ function App() {
       title: "Auto Rikshaw",
       type: "auto",
       color: "bg-gradient-to-br from-white/20 to-white/10",
-      expandedColor: "bg-gradient-to-br from-white/15 to-white/5",
+      expandedColor: "bg-gradient-to-br from-white/9 to-white/1",
       borderColor: "border-white/20"
     },
     {
       title: "Bus",
       type: "bus",
       color: "bg-gradient-to-br from-white/20 to-white/10",
-      expandedColor: "bg-gradient-to-br from-white/15 to-white/5",
+      expandedColor: "bg-gradient-to-br from-white/9 to-white/1",
       borderColor: "border-white/20"
     },
     {
       title: "Taxi",
       type: "taxi",
       color: "bg-gradient-to-br from-white/20 to-white/10",
-      expandedColor: "bg-gradient-to-br from-white/15 to-white/5",
+      expandedColor: "bg-gradient-to-br from-white/9 to-white/1",
       borderColor: "border-white/20"
     }
   ];
@@ -213,7 +213,8 @@ function App() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="h-screen fixed inset-0 bg-[#0b0f14] p-4 md:p-8 flex flex-col"
+        className="h-screen fixed inset-0 bg-[#0b0f14] p-4 md:p-8 flex flex-col bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url("/bg.webp")' }}
       >
         {showTutorial && (
           <motion.div
@@ -249,7 +250,7 @@ function App() {
           </motion.div>
         )}
         <div className="relative w-full max-w-4xl mx-auto h-full">
-          <div className="absolute inset-0 backdrop-blur-sm"></div>
+          <div className="absolute inset-0"></div>
           <div className="relative h-full flex flex-col">
             {!isExpanded && (
               <motion.div 
@@ -342,7 +343,7 @@ function App() {
                         ${!isCenter ? 'cursor-pointer' : 
                           isExpanded ? 'cursor-default' : 'cursor-grab'
                         }
-                        ${isExpanded ? card.expandedColor : 'bg-white/15'} 
+                        ${isExpanded ? card.expandedColor : 'bg-white/9'} 
                         border border-white/[0.18]
                         rounded-[10px]
                         shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]
