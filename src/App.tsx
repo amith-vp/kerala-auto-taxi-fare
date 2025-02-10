@@ -249,7 +249,7 @@ function App() {
             </div>
           </motion.div>
         )}
-        <div className="relative w-full max-w-4xl mx-auto h-full">
+        <div className="relative w-full max-w-5xl mx-auto h-full">
           <div className="absolute inset-0"></div>
           <div className="relative h-full flex flex-col">
             {!isExpanded && (
