@@ -258,15 +258,15 @@ function App() {
                 initial={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
               >
-                <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80  tracking-wide mb-4 drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)] select-none">
+                <h1 className="text-5xl md:text-6xl 2xl:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80  tracking-wide mb-4 drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)] select-none">
                   Kerala Auto Taxi Fare Calculator 
                 </h1>
-                <p className="text-xl text-white/90  max-w-2xl mx-auto leading-relaxed mb-4 drop-shadow-sm backdrop-blur-[2px] select-none">
+                <p className="text-xl 2xl:text-2xl text-white/90  max-w-2xl mx-auto leading-relaxed mb-2 drop-shadow-sm backdrop-blur-[2px] select-none">
                   Calculate the fare for your Auto Rikshaw, Bus, or Taxi ride in Kerala.
                 </p>
               </motion.div>
             )}
-            <div className={`flex-1 flex justify-center ${isExpanded ? 'pt-0' : 'pt-8'}`}>
+            <div className={`flex-1 flex justify-center items-center`}>
               <motion.div 
                 className="relative"
                 animate={{
@@ -302,7 +302,7 @@ function App() {
                         y: isExpanded 
                           ? (diff * 60) 
                           : (isCenter ? 0 : 20),
-                        height: isExpanded ? '90vh' : '20rem',
+                        height: isExpanded ? 'auto' : '20rem',
                         scale: isExpanded ? (isCenter ? 1 : 0.9) : (isCenter ? 1 : 0.9),
                         rotate: isExpanded 
                           ? 0 
@@ -310,8 +310,8 @@ function App() {
                         opacity: isExpanded ? (isCenter ? 1 : 0) : (isCenter ? 1 : 0.7),
                         width: isExpanded ? '100%' : '18rem',
                         position: 'absolute',
-                        top: isExpanded ? 0 : 'auto',
-                        left: isExpanded ? 0 : 'auto',
+                        top:'auto',
+                        left:'auto',
                         pointerEvents: isExpanded && !isCenter ? 'none' : 'auto'
                       }}
                       transition={{
