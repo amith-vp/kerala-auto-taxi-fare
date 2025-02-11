@@ -266,7 +266,7 @@ function App() {
                 </p>
               </motion.div>
             )}
-            <div className={`flex-1 flex justify-center items-center`}>
+            <div className={`flex-1 flex justify-center ${isExpanded ? '' : 'items-center'}`}>
               <motion.div 
                 className="relative"
                 animate={{
@@ -274,6 +274,9 @@ function App() {
                   height: isExpanded ? 'calc(100vh - 120px)' : '20rem'
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                style={{
+                  overflow: isExpanded ? 'auto' : 'visible'
+                }}
               >
                 {cards.map((card, index) => {
                   const diff = modulo(index - front, cardsLength);
@@ -349,7 +352,7 @@ function App() {
                         shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]
                         backdrop-blur-[6px]
                         [-webkit-backdrop-filter:blur(6px)]
-                        overflow-hidden
+                        ${isExpanded ? 'overflow-y-auto' : 'overflow-hidden'}
                         flex flex-col
                         origin-center
                         transition-colors duration-300
