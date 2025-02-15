@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -40,6 +40,7 @@ const MapEvents: React.FC<{
 };
 
 const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose }) => {
+  const mapRef = useRef<L.Map | null>(null);
   const [startPoint, setStartPoint] = useState<[number, number] | null>(null);
   const [endPoint, setEndPoint] = useState<[number, number] | null>(null);
   const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
@@ -95,10 +96,12 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
   }, [endSearch, places]);
 
   const handleStartSelect = (place: Place) => {
+    const point = [parseFloat(place.lat), parseFloat(place.lon)] as [number, number];
     setStartSearch(place.name);
-    setStartPoint([parseFloat(place.lat), parseFloat(place.lon)]);
+    setStartPoint(point);
     setShowStartSuggestions(false);
     setRouteKey(prev => prev + 1);
+    mapRef.current?.flyTo(point, 14);
   };
 
   const handleEndSelect = (place: Place) => {
@@ -132,12 +135,14 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
 
   const handleMapClick = (lat: number, lng: number) => {
     if (!startPoint) {
-      setStartPoint([lat, lng]);
-      const closest = findClosestPlace([lat, lng]);
+      const point: [number, number] = [lat, lng];
+      setStartPoint(point);
+      const closest = findClosestPlace(point);
       if (closest) {
         setStartSearch(closest.name);
         setShowStartSuggestions(false); //  dropdown hidden
       }
+      mapRef.current?.flyTo(point, 14);
     } else if (!endPoint) {
       setEndPoint([lat, lng]);
       const closest = findClosestPlace([lat, lng]);
@@ -178,6 +183,8 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
       }
       if (totalDistance) {
         setCalculatedDistance(Number(totalDistance.toFixed(2)));
+        const bounds = L.latLngBounds(points.map(point => L.latLng(point[0], point[1])));
+        mapRef.current?.fitBounds(bounds, { padding: [50, 50] });
       }
     }
   }, [places]);
@@ -315,6 +322,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
 
         <div className="relative h-[60vh] rounded-lg overflow-hidden touch-manipulation">
           <MapContainer
+            ref={mapRef}
             center={[10.0159, 76.3419]}
             zoom={12}
             style={{ height: "100%", width: "100%" }}
@@ -325,7 +333,6 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
             bounds={KERALA_BOUNDS}
             attributionControl={false}
             dragging={true}
-            tap={true}
             touchZoom={true}
             doubleClickZoom={false}
             className="touch-manipulation"
@@ -353,11 +360,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
                 position={startPoint} 
                 icon={startIcon}
                 eventHandlers={{
-                  dragend: handleMarkerDrag(true),
-                  touchstart: (e: L.LeafletEvent) => {
-                    const marker = e.target as L.Marker;
-                    marker.dragging?.enable();
-                  }
+                  dragend: handleMarkerDrag(true)
                 }}
               />
             )}
