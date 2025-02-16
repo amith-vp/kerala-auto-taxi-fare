@@ -271,52 +271,56 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
     <div className="space-y-4">
       <div>
         <h2 className="text-lg text-white/70 mb-2">Starting Point</h2>
-        <SearchInput
-          value={startSearch}
-          onChange={handleStartInputChange}
-          onFocus={() => setShowStartSuggestions(!!startSearch)}
-          onBlur={() => handleInputBlur(true)}
-          placeholder="Where are you starting from?"
-          icon={<MapPin size={18} />}
-        />
-        {showStartSuggestions && (
-          <div className="absolute z-[1002] w-full mt-1 bg-black/90 rounded-lg border border-white/20 max-h-60 overflow-y-auto">
-            {filteredStartPlaces.map((place) => (
-              <div
-                key={place.name}
-                onClick={() => handleStartSelect(place)}
-                className="px-4 py-3 hover:bg-white/10 cursor-pointer text-white transition-colors"
-              >
-                {place.name}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="relative">
+          <SearchInput
+            value={startSearch}
+            onChange={handleStartInputChange}
+            onFocus={() => setShowStartSuggestions(!!startSearch)}
+            onBlur={() => handleInputBlur(true)}
+            placeholder="Where are you starting from?"
+            icon={<MapPin size={18} />}
+          />
+          {showStartSuggestions && (
+            <div className="absolute z-[1002] left-0 right-0 mt-1 bg-black/90 rounded-lg border border-white/20 max-h-60 overflow-y-auto">
+              {filteredStartPlaces.map((place) => (
+                <div
+                  key={place.name}
+                  onClick={() => handleStartSelect(place)}
+                  className="px-4 py-3 hover:bg-white/10 cursor-pointer text-white transition-colors"
+                >
+                  {place.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div>
         <h2 className="text-lg text-white/70 mb-2">Destination</h2>
-        <SearchInput
-          value={endSearch}
-          onChange={handleEndInputChange}
-          onFocus={() => setShowEndSuggestions(!!endSearch)}
-          onBlur={() => handleInputBlur(false)}
-          placeholder="Where are you going?"
-          icon={<Target size={18} />}
-        />
-        {showEndSuggestions && (
-          <div className="absolute z-[1002] w-full mt-1 bg-black/90 rounded-lg border border-white/20 max-h-60 overflow-y-auto">
-            {filteredEndPlaces.map((place) => (
-              <div
-                key={place.name}
-                onClick={() => handleEndSelect(place)}
-                className="px-4 py-3 hover:bg-white/10 cursor-pointer text-white transition-colors"
-              >
-                {place.name}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="relative">
+          <SearchInput
+            value={endSearch}
+            onChange={handleEndInputChange}
+            onFocus={() => setShowEndSuggestions(!!endSearch)}
+            onBlur={() => handleInputBlur(false)}
+            placeholder="Where are you going?"
+            icon={<Target size={18} />}
+          />
+          {showEndSuggestions && (
+            <div className="absolute z-[1002] left-0 right-0 mt-1 bg-black/90 rounded-lg border border-white/20 max-h-60 overflow-y-auto">
+              {filteredEndPlaces.map((place) => (
+                <div
+                  key={place.name}
+                  onClick={() => handleEndSelect(place)}
+                  className="px-4 py-3 hover:bg-white/10 cursor-pointer text-white transition-colors"
+                >
+                  {place.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {calculatedDistance && (
@@ -344,6 +348,10 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
           {isCalculating ? 'Calculating...' : 'Confirm Route'}
         </button>
       )}
+
+      <div className="text-[10px] text-white/40 text-center">
+        Autocomplete data by <a href="https://subinsb.com/simple-analysis-of-kerala-place-names/" target="_blank" rel="noopener noreferrer" className="text-white/60">Kerala Place Name Analysis</a>
+      </div>
     </div>
   );
 
@@ -424,9 +432,6 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
             </MapContainer>
           </div>
         </div>
-        <div className="text-[10px] text-white/40 text-center">
-        Autocomplete data by <a href="https://subinsb.com/simple-analysis-of-kerala-place-names/" target="_blank" rel="noopener noreferrer" className="text-white/60">Kerala Place Name Analysis</a>
-      </div>
       </div>
     </div>
   );
