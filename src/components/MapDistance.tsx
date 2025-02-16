@@ -424,6 +424,9 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
             </MapContainer>
           </div>
         </div>
+        <div className="text-[10px] text-white/40 text-center">
+        Autocomplete data by <a href="https://subinsb.com/simple-analysis-of-kerala-place-names/" target="_blank" rel="noopener noreferrer" className="text-white/60">Kerala Place Name Analysis</a>
+      </div>
       </div>
     </div>
   );
