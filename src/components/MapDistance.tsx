@@ -11,6 +11,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import RoutingControl from './RoutingControl';
 import { startIcon, endIcon } from './MarkerIcons';
+import { MapPin, Target, Ruler, X } from 'lucide-react';
 
 const KERALA_BOUNDS: L.LatLngBoundsExpression = [
   [8.2, 74.8],
@@ -47,11 +48,11 @@ const SearchInput: React.FC<{
   onFocus: () => void;
   onBlur: () => void;
   placeholder: string;
-  icon: string;
+  icon: React.ReactNode;
 }> = ({ value, onChange, onFocus, onBlur, placeholder, icon }) => (
   <div className="relative">
-    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <span className="text-white/50">{icon}</span>
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/50">
+      {icon}
     </div>
     <input
       type="text"
@@ -73,6 +74,12 @@ const MapEvents: React.FC<{ onMapClick: (lat: number, lng: number) => void }> = 
   });
   return null;
 };
+
+const MapInstructions: React.FC = () => (
+  <div className="absolute z-[1000] bottom-4 left-4 bg-black/40 text-white/80 px-2 py-1.5 rounded text-[10px] pointer-events-none">
+    Tap to set points • Drag markers to move • Tap path for stops
+  </div>
+);
 
 const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose }) => {
   const mapRef = useRef<L.Map | null>(null);
@@ -270,7 +277,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
           onFocus={() => setShowStartSuggestions(!!startSearch)}
           onBlur={() => handleInputBlur(true)}
           placeholder="Where are you starting from?"
-          icon="📍"
+          icon={<MapPin size={18} />}
         />
         {showStartSuggestions && (
           <div className="absolute z-[1002] w-full mt-1 bg-black/90 rounded-lg border border-white/20 max-h-60 overflow-y-auto">
@@ -295,7 +302,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
           onFocus={() => setShowEndSuggestions(!!endSearch)}
           onBlur={() => handleInputBlur(false)}
           placeholder="Where are you going?"
-          icon="🎯"
+          icon={<Target size={18} />}
         />
         {showEndSuggestions && (
           <div className="absolute z-[1002] w-full mt-1 bg-black/90 rounded-lg border border-white/20 max-h-60 overflow-y-auto">
@@ -315,13 +322,13 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
       {calculatedDistance && (
         <div className="bg-white/5 p-4 rounded-lg">
           <div className="flex items-center gap-2">
-            <span className="text-white/50">📏</span>
+            <Ruler size={18} className="text-white/50" />
             <span className="text-white">{calculatedDistance.toFixed(2)} km</span>
           </div>
         </div>
       )}
 
-      {startPoint && endPoint && (
+      {calculatedDistance && (
         <button
           onClick={() => {
             if (calculatedDistance && !isCalculating) {
@@ -348,7 +355,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
             onClick={onClose}
             className="text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors"
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
@@ -373,6 +380,7 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
             >
               <AttributionControl position="bottomright" prefix={false} />
               <MapEvents onMapClick={handleMapClick} />
+              <MapInstructions />
               
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://jawg.io">JawgIO</a>'
