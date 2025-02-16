@@ -5,7 +5,7 @@ import {
   Marker,
   useMapEvents,
   AttributionControl,
-  GeoJSON
+  GeoJSON,
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -13,8 +13,8 @@ import RoutingControl from './RoutingControl';
 import { startIcon, endIcon } from './MarkerIcons';
 
 const KERALA_BOUNDS: L.LatLngBoundsExpression = [
-  [8.2, 74.8], // Southwest corner
-  [12.8, 77.4]  // Northeast corner
+  [8.2, 74.8],
+  [12.8, 77.4]
 ];
 
 interface Place {
@@ -28,11 +28,46 @@ interface MapDistanceProps {
   onClose: () => void;
 }
 
-const MapEvents: React.FC<{
-  onMapClick: (lat: number, lng: number) => void;
-}> = ({ onMapClick }) => {
+const StepIndicator: React.FC<{ currentStep: number, totalSteps: number }> = ({ currentStep, totalSteps }) => (
+  <div className="flex gap-2 justify-center my-4">
+    {Array.from({ length: totalSteps }).map((_, idx) => (
+      <div
+        key={idx}
+        className={`h-2 w-2 rounded-full transition-all duration-300 ${
+          idx < currentStep ? 'bg-yellow-500' : 'bg-white/20'
+        }`}
+      />
+    ))}
+  </div>
+);
+
+const SearchInput: React.FC<{
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus: () => void;
+  onBlur: () => void;
+  placeholder: string;
+  icon: string;
+}> = ({ value, onChange, onFocus, onBlur, placeholder, icon }) => (
+  <div className="relative">
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <span className="text-white/50">{icon}</span>
+    </div>
+    <input
+      type="text"
+      value={value}
+      onChange={onChange}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      placeholder={placeholder}
+      className="w-full pl-10 pr-4 py-3 bg-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+    />
+  </div>
+);
+
+const MapEvents: React.FC<{ onMapClick: (lat: number, lng: number) => void }> = ({ onMapClick }) => {
   useMapEvents({
-    click: (e: L.LeafletMouseEvent) => {
+    click: (e) => {
       onMapClick(e.latlng.lat, e.latlng.lng);
     },
   });
@@ -213,211 +248,162 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
     setRouteKey(prev => prev + 1);
   }, []);
 
-  const clearRoute = () => {
-    setStartPoint(null);
-    setEndPoint(null);
-    setCalculatedDistance(null);
-    setStartSearch("");
-    setEndSearch("");
-    setShowStartSuggestions(false);
-    setShowEndSuggestions(false);
-    setRouteKey(prev => prev + 1);
-  };
+  const renderInputs = () => (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg text-white/70 mb-2">Starting Point</h2>
+        <SearchInput
+          value={startSearch}
+          onChange={handleStartInputChange}
+          onFocus={() => setShowStartSuggestions(!!startSearch)}
+          onBlur={() => handleInputBlur(true)}
+          placeholder="Where are you starting from?"
+          icon="📍"
+        />
+        {showStartSuggestions && (
+          <div className="absolute z-[1002] w-full mt-1 bg-black/90 rounded-lg border border-white/20 max-h-60 overflow-y-auto">
+            {filteredStartPlaces.map((place) => (
+              <div
+                key={place.name}
+                onClick={() => handleStartSelect(place)}
+                className="px-4 py-3 hover:bg-white/10 cursor-pointer text-white transition-colors"
+              >
+                {place.name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-  const getHeaderInstructions = () => {
-    if (!startPoint) return '👆 Tap on the map or search to select starting point';
-    if (!endPoint) return '👆 Tap anywhere or search to set destination';
-    return null;
-  };
+      <div>
+        <h2 className="text-lg text-white/70 mb-2">Destination</h2>
+        <SearchInput
+          value={endSearch}
+          onChange={handleEndInputChange}
+          onFocus={() => setShowEndSuggestions(!!endSearch)}
+          onBlur={() => handleInputBlur(false)}
+          placeholder="Where are you going?"
+          icon="🎯"
+        />
+        {showEndSuggestions && (
+          <div className="absolute z-[1002] w-full mt-1 bg-black/90 rounded-lg border border-white/20 max-h-60 overflow-y-auto">
+            {filteredEndPlaces.map((place) => (
+              <div
+                key={place.name}
+                onClick={() => handleEndSelect(place)}
+                className="px-4 py-3 hover:bg-white/10 cursor-pointer text-white transition-colors"
+              >
+                {place.name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-  const getMapInstructions = () => {
-    if (startPoint && endPoint) {
-      return '✋ Drag markers to move • Tap yellow line to add stops';
-    }
-    return null;
-  };
+      {calculatedDistance && (
+        <div className="bg-white/5 p-4 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-white/50">📏</span>
+            <span className="text-white">{calculatedDistance.toFixed(2)} km</span>
+          </div>
+        </div>
+      )}
 
-  const geoJSONStyle = {
-    fillColor: 'transparent',
-    weight: 2,
-    opacity: 0.1,
-    color: 'white',
-    fillOpacity: 0.1
-  };
+      {startPoint && endPoint && (
+        <button
+          onClick={() => {
+            if (calculatedDistance && !isCalculating) {
+              onDistanceCalculated(calculatedDistance);
+              onClose();
+            }
+          }}
+          className={`w-full py-3 ${
+            isCalculating ? 'bg-yellow-500/50' : 'bg-yellow-500 hover:bg-yellow-400'
+          } text-black font-medium rounded-lg transition-colors`}
+          disabled={isCalculating}
+        >
+          {isCalculating ? 'Calculating...' : 'Confirm Route'}
+        </button>
+      )}
+    </div>
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-black/90 backdrop-blur-md p-4 rounded-lg w-[90vw] max-w-5xl">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-white font-semibold">Select Route Points</h3>
-          <div className="flex gap-2">
-            {(startPoint || endPoint) && (
-              <button 
-                onClick={clearRoute}
-                className="px-3 py-1 bg-red-600/70 text-white text-sm rounded hover:bg-red-600"
-              >
-                Clear Route
-              </button>
-            )}
-            <button onClick={onClose} className="text-white/70 hover:text-white px-2">✕</button>
-          </div>
-        </div>
-
-        <div className="flex gap-4 mb-4 relative z-[1001]">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={startSearch}
-              onChange={handleStartInputChange}
-              onFocus={() => setShowStartSuggestions(!!startSearch)}
-              onBlur={() => handleInputBlur(true)}
-              placeholder="Starting point"
-              className="w-full px-4 py-2 bg-white/10 rounded text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-            {showStartSuggestions && filteredStartPlaces.length > 0 && (
-              <div className="absolute z-[1002] w-full mt-1 bg-black/90 rounded-lg border border-white/20">
-                {filteredStartPlaces.map((place) => (
-                  <div
-                    key={place.name}
-                    onClick={() => handleStartSelect(place)}
-                    className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white"
-                  >
-                    {place.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={endSearch}
-              onChange={handleEndInputChange}
-              onFocus={() => setShowEndSuggestions(!!endSearch)}
-              onBlur={() => handleInputBlur(false)}
-              placeholder="Destination"
-              className="w-full px-4 py-2 bg-white/10 rounded text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
-            {showEndSuggestions && filteredEndPlaces.length > 0 && (
-              <div className="absolute z-[1002] w-full mt-1 bg-black/90 rounded-lg border border-white/20">
-                {filteredEndPlaces.map((place) => (
-                  <div
-                    key={place.name}
-                    onClick={() => handleEndSelect(place)}
-                    className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white"
-                  >
-                    {place.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {getHeaderInstructions() && (
-          <div className="text-white/90 text-sm md:text-md text-center mb-4">
-            <p>{getHeaderInstructions()}</p>
-          </div>
-        )}
-
-        <div className="relative h-[60vh] rounded-lg overflow-hidden touch-manipulation">
-          <MapContainer
-            ref={mapRef}
-            center={[10.0159, 76.3419]}
-            zoom={12}
-            style={{ height: "100%", width: "100%" }}
-            maxBounds={KERALA_BOUNDS}
-            minZoom={7}
-            maxZoom={18}
-            boundsOptions={{ padding: [50, 50] }}
-            bounds={KERALA_BOUNDS}
-            attributionControl={false}
-            dragging={true}
-            touchZoom={true}
-            doubleClickZoom={false}
-            className="touch-manipulation"
+    <div className="fixed inset-0 z-50 flex  justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-black/90 backdrop-blur-md p-6 rounded-xl w-[90vw] max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={onClose}
+            className="text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors"
           >
-            <AttributionControl
-              position="bottomright"
-              prefix={false}
-            />
-            <MapEvents onMapClick={handleMapClick} />
-            
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://jawg.io">JawgIO</a>'
-              url={`https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}.png?access-token=${import.meta.env.VITE_JAWG_ACCESS_TOKEN}`}
-            />
-
-            {districtData && ( 
-              <GeoJSON
-                data={districtData}
-                pathOptions={geoJSONStyle}
-              />
-            )}
-
-            {startPoint && (
-              <Marker 
-                position={startPoint} 
-                icon={startIcon}
-                eventHandlers={{
-                  dragend: handleMarkerDrag(true)
-                }}
-              />
-            )}
-
-            {endPoint && (
-              <Marker 
-                position={endPoint}
-                icon={endIcon}
-                eventHandlers={{
-                  dragend: handleMarkerDrag(false)
-                }}
-              />
-            )}
-
-            {startPoint && endPoint && (
-              <RoutingControl
-                key={routeKey}
-                position="topleft"
-                start={startPoint}
-                end={endPoint}
-                color="#ffff00"
-                onWaypointChange={handleWaypointChange}
-              />
-            )}
-            {getMapInstructions() && (
-              <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-black/70 text-white text-xs p-2 rounded-lg text-center">
-                {getMapInstructions()}
-              </div>
-            )}
-          </MapContainer>
+            ✕
+          </button>
         </div>
-        
-        {startPoint && endPoint && (
-          <div className="mt-4 flex justify-center gap-4">
-            <button
-              onClick={clearRoute}
-              className="px-4 py-2 bg-red-600/70 text-white rounded hover:bg-red-600"
-              disabled={isCalculating}
-            >
-              Reset Route
-            </button>
-            <button
-              onClick={() => {
-                if (calculatedDistance && !isCalculating) {
-                  onDistanceCalculated(calculatedDistance);
-                  onClose();
-                }
-              }}
-              className={`px-4 py-2 ${
-                isCalculating ? 'bg-blue-600/50' : 'bg-blue-600'
-              } text-white rounded hover:bg-blue-700`}
-              disabled={isCalculating}
-            >
-              {isCalculating ? 'Calculating...' : 'Confirm Route'}
-            </button>
+
+        <div className="flex h-full flex-col md:grid md:grid-cols-2 gap-6">
+          <div className="order-1">
+            {renderInputs()}
           </div>
-        )}
+
+          <div className="relative h-full rounded-xl overflow-hidden order-2">
+            <MapContainer
+              ref={mapRef}
+              center={[10.0159, 76.3419]}
+              zoom={12}
+              style={{ height: "100%", width: "100%" }}
+              maxBounds={KERALA_BOUNDS}
+              minZoom={7}
+              maxZoom={18}
+              boundsOptions={{ padding: [50, 50] }}
+              bounds={KERALA_BOUNDS}
+              attributionControl={false}
+              className="rounded-xl"
+            >
+              <AttributionControl position="bottomright" prefix={false} />
+              <MapEvents onMapClick={handleMapClick} />
+              
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://jawg.io">JawgIO</a>'
+                url={`https://tile.jawg.io/jawg-matrix/{z}/{x}/{y}.png?access-token=${import.meta.env.VITE_JAWG_ACCESS_TOKEN}`}
+              />
+
+              {districtData && <GeoJSON data={districtData} pathOptions={{ 
+                fillColor: 'transparent',
+                weight: 2,
+                opacity: 0.1,
+                color: 'white',
+                fillOpacity: 0.1
+              }} />}
+
+              {startPoint && (
+                <Marker 
+                  position={startPoint} 
+                  icon={startIcon}
+                  eventHandlers={{ dragend: handleMarkerDrag(true) }}
+                />
+              )}
+
+              {endPoint && (
+                <Marker 
+                  position={endPoint}
+                  icon={endIcon}
+                  eventHandlers={{ dragend: handleMarkerDrag(false) }}
+                />
+              )}
+
+              {startPoint && endPoint && (
+                <RoutingControl
+                  key={routeKey}
+                  position="topleft"
+                  start={startPoint}
+                  end={endPoint}
+                  color="#ffff00"
+                  onWaypointChange={handleWaypointChange}
+                />
+              )}
+            </MapContainer>
+          </div>
+        </div>
       </div>
     </div>
   );
