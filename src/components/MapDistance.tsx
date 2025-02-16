@@ -104,9 +104,15 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
 
   useEffect(() => {
     if (startSearch) {
-      const filtered = places.filter(place =>
-        place.name.toLowerCase().includes(startSearch.toLowerCase())
-      ).slice(0, 5);
+      const searchLower = startSearch.toLowerCase();
+      const exactStarts = places.filter(place =>
+        place.name.toLowerCase().startsWith(searchLower)
+      );
+      const containsMatch = places.filter(place =>
+        !place.name.toLowerCase().startsWith(searchLower) && 
+        place.name.toLowerCase().includes(searchLower)
+      );
+      const filtered = [...exactStarts, ...containsMatch].slice(0, 5);
       setFilteredStartPlaces(filtered);
       const isSearching = startSearch !== findClosestPlace(startPoint || [0, 0])?.name;
       setShowStartSuggestions(isSearching && filtered.length > 0);
@@ -118,9 +124,15 @@ const MapDistance: React.FC<MapDistanceProps> = ({ onDistanceCalculated, onClose
 
   useEffect(() => {
     if (endSearch) {
-      const filtered = places.filter(place =>
-        place.name.toLowerCase().includes(endSearch.toLowerCase())
-      ).slice(0, 5);
+      const searchLower = endSearch.toLowerCase();
+      const exactStarts = places.filter(place =>
+        place.name.toLowerCase().startsWith(searchLower)
+      );
+      const containsMatch = places.filter(place =>
+        !place.name.toLowerCase().startsWith(searchLower) && 
+        place.name.toLowerCase().includes(searchLower)
+      );
+      const filtered = [...exactStarts, ...containsMatch].slice(0, 5);
       setFilteredEndPlaces(filtered);
       const isSearching = endSearch !== findClosestPlace(endPoint || [0, 0])?.name;
       setShowEndSuggestions(isSearching && filtered.length > 0);
