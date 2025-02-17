@@ -161,7 +161,7 @@ export const FareBreakdown: React.FC<FareBreakdownProps> = ({ fares, date = new 
               >
                 SitInShade.com
               </a>
-              {' '}to avoid sun light while travling!
+              {' '}to avoid sunlight while travelling !
             </p>
           </div>
         </div>
