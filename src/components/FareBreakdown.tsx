@@ -156,7 +156,7 @@ export const FareBreakdown: React.FC<FareBreakdownProps> = ({ fares, date = new 
               <a 
                 href="https://sitinshade.com" 
                 target="_blank" 
-                rel="noopener noreferrer"
+                rel="noopener"
                 className="text-gray-600 hover:text-gray-800 underline decoration-dotted decoration-gray-400 decoration-1 underline-offset-2 transition-colors"
               >
                 SitInShade.com
